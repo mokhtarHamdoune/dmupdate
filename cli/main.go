@@ -1,32 +1,73 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"os"
+	"strings"
+	"time"
 
 	"github.com/mokhtarHamdoue/dmupdater/core"
 )
 
-type CliIO struct{}
-
-func (c *CliIO) Write(p []byte) (int, error){
-	return os.Stdout.Write(p)
+func readStringFromBuffer(reader *bufio.Reader) (string, error) {
+	value, err := reader.ReadString('\n')
+	value = strings.Trim(value, "\n")
+	return value, err
 }
 
-func (c *CliIO) Read(p []byte) (int, error){
-	return os.Stdin.Read(p)
-}
+func createAPP() *core.APP {
+	reader := bufio.NewReader(os.Stdin)
+	app := core.NewEmptyApplication()
 
-func main(){
-	
-	appsManager := core.AppsManager{}
-
-	appsManager.SetAppsManagerIO(&CliIO{})
-
-	newApp, err := appsManager.CreateApplication()
-	
-	if err != nil {
-		fmt.Println(err)
+	for {
+		fmt.Print("Name of the application > ")
+		appName, _ := readStringFromBuffer(reader)
+		err := app.SetName(appName)
+		if err != nil {
+			fmt.Println(err)
+			continue
+		}
+		break
 	}
-	fmt.Println(newApp)
+
+	for {
+		fmt.Print("Version of the application > V")
+		appVersion, _ := readStringFromBuffer(reader)
+		err := app.SetVersion(appVersion)
+		if err != nil {
+			fmt.Println(err)
+			continue
+		}
+		break
+	}
+
+	fmt.Print("Url of the repository >")
+	url, _ := readStringFromBuffer(reader)
+	app.SetUrl(url)
+
+	fmt.Print("Is this version stable (Y/N), it's N if you skip > ")
+	isLts, _ := readStringFromBuffer(reader)
+	app.SetIsLTS(isLts == "Y")
+
+	for {
+		fmt.Print("Release date of this version (YYYY-MM-DD), it's today if you skip > ")
+		releaseDate, _ := readStringFromBuffer(reader)
+		if releaseDate != "" {
+			err := app.SetReleaseDate(releaseDate)
+			fmt.Println(err)
+			continue
+		} else {
+			app.SetReleaseDate(time.Now().Format("YYYY-MM-DD"))
+		}
+		break
+	}
+	return app
+
+}
+
+func main() {
+	app := createAPP()
+	fmt.Println(app)
+
 }
