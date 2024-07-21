@@ -93,7 +93,7 @@ func (a *APP) SetDescription(description string) {
 
 // release date of  of current version of the application (optional)
 func (a *APP) SetReleaseDate(releaseDate string) error {
-	rd, err := time.Parse("YYYY-MM-DD", releaseDate)
+	rd, err := time.Parse("2006-01-02", releaseDate)
 	if err != nil {
 		return err
 	}
